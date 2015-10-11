@@ -1,14 +1,34 @@
 defmodule ExTop do
   use GenServer
 
-  defstruct [:data, selected: 0, offset: 0]
+  defstruct [:node, :data, selected: 0, offset: 0]
 
   def start_link(opts \\ []) do
     GenServer.start_link ExTop, opts
   end
 
-  def main(_) do
-    ExTop.start_link
+  def main(args) do
+    {opts, args, _} = OptionParser.parse(args)
+
+    name = Keyword.get(opts, :name, "ex_top") |> String.to_atom
+
+    Node.start(name, :shortnames)
+
+    if cookie = Keyword.get(opts, :cookie) do
+      Node.set_cookie(String.to_atom(cookie))
+    end
+
+    node = case args do
+             [] -> Node.self
+             [node] -> String.to_atom(node)
+           end
+    :pong = Node.ping(node)
+
+    # Load ExTop.Collector on the target node.
+    {mod, bin, file} = :code.get_object_code(ExTop.Collector)
+    :rpc.call node, :code, :load_binary, [mod, file, bin]
+
+    ExTop.start_link node: node
     :timer.sleep :infinity
   end
 
@@ -17,12 +37,13 @@ defmodule ExTop do
     IO.write IO.ANSI.clear
     send self, :tick
     :timer.send_interval 1000, :tick
-    {:ok, %ExTop{}}
+    {:ok, %ExTop{node: Keyword.get(opts, :node, Node.self)}}
   end
 
   def handle_info(:tick, state) do
     GenServer.cast self, :render
-    {:noreply, %{state | data: ExTop.Collector.collect}}
+    data = :rpc.call state.node, ExTop.Collector, :collect, []
+    {:noreply, %{state | data: data}}
   end
 
   # Up Arrow
