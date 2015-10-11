@@ -17,7 +17,7 @@ defmodule ExTop do
     IO.write IO.ANSI.clear
     send self, :tick
     :timer.send_interval 1000, :tick
-    {:ok, %ExTop{data: ExTop.Collector.collect}}
+    {:ok, %ExTop{}}
   end
 
   def handle_info(:tick, state) do
