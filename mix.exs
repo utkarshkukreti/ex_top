@@ -7,7 +7,8 @@ defmodule ExTop.Mixfile do
      elixir: "~> 1.1",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps,
+     escript: escript]
   end
 
   # Configuration for the OTP application
@@ -28,5 +29,10 @@ defmodule ExTop.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     []
+  end
+
+  defp escript do
+    [main_module: ExTop,
+     emu_args: "-noinput -elixir ansi_enabled true"]
   end
 end
