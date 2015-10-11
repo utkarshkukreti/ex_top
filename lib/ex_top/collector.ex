@@ -1,7 +1,8 @@
 defmodule ExTop.Collector do
   def collect do
     processes = for pid <- :erlang.processes do
-      info = :erlang.process_info(pid, [:memory,
+      info = :erlang.process_info(pid, [:current_function,
+                                        :memory,
                                         :message_queue_len,
                                         :reductions,
                                         :registered_name])
