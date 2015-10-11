@@ -3,7 +3,8 @@ defmodule ExTop.View do
             {"Registered Name", 24, :left},
             {"Memory", 9, :right},
             {"Reductions", 10, :right},
-            {"Message Queue", 13, :right}]
+            {"Message Queue", 13, :right},
+            {"Current Function", 24, :left}]
 
   def render(data, opts \\ []) do
     [separator,
@@ -39,6 +40,9 @@ defmodule ExTop.View do
            "Memory" -> inspect(process[:memory])
            "Reductions" -> inspect(process[:reductions])
            "Message Queue" -> inspect(process[:message_queue_len])
+           "Current Function" ->
+             {m, f, a} = process[:current_function]
+             "#{inspect(m)}.#{f}/#{a}"
          end
          just(text, size, align)
        end |> Enum.intersperse(" | "),
