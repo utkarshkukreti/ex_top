@@ -26,26 +26,33 @@ defmodule ExTop do
   end
 
   # Up Arrow
-  def handle_info({_port, {:data, "\e[A"}}, state) do
+  def handle_info({port, {:data, "\e[A" <> rest}}, state) do
     selected = if state.selected == 0 do
       0
     else
       state.selected - 1
     end
+    send self, {port, {:data, rest}}
     GenServer.cast self, :render
     {:noreply, %{state | selected: selected}}
   end
 
   # Down Arrow
-  def handle_info({_port, {:data, "\e[B"}}, state) do
+  def handle_info({port, {:data, "\e[B" <> rest}}, state) do
     max = Enum.count(state.data[:processes]) - 1
     selected = if state.selected >= max do
       max
     else
       state.selected + 1
     end
+    send self, {port, {:data, rest}}
     GenServer.cast self, :render
     {:noreply, %{state | selected: selected}}
+  end
+
+  # Empty
+  def handle_info({_port, {:data, ""}}, state) do
+    {:noreply, state}
   end
 
   def handle_cast(:render, state) do
