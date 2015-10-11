@@ -1,7 +1,7 @@
 defmodule ExTop do
   use GenServer
 
-  defstruct [:data]
+  defstruct [:data, selected: 0]
 
   def start_link(opts \\ []) do
     GenServer.start_link ExTop, opts
@@ -25,7 +25,8 @@ defmodule ExTop do
   end
 
   def handle_cast(:render, state) do
-    IO.write [IO.ANSI.home, ExTop.View.render(state.data)]
+    IO.write [IO.ANSI.home,
+              ExTop.View.render(state.data, selected: state.selected)]
     {:noreply, state}
   end
 end

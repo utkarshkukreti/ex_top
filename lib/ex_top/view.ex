@@ -5,11 +5,11 @@ defmodule ExTop.View do
             {"Reductions", 10, :right},
             {"Message Queue", 13, :right}]
 
-  def render(data) do
+  def render(data, opts \\ []) do
     [separator,
      heading,
      separator,
-     rows(data[:processes]),
+     rows(data[:processes], opts),
      separator] |> Enum.intersperse("\n\r")
   end
 
@@ -29,9 +29,9 @@ defmodule ExTop.View do
     " |"]
   end
 
-  defp rows(processes) do
-    for process <- processes do
-      ["| ",
+  defp rows(processes, opts) do
+    for {process, index} <- Enum.with_index(processes) do
+      row = ["| ",
        for {name, size, align} <- @columns do
          text = case name do
            "PID" -> IO.iodata_to_binary(:erlang.pid_to_list(process[:pid]))
@@ -43,6 +43,11 @@ defmodule ExTop.View do
          just(text, size, align)
        end |> Enum.intersperse(" | "),
        " |"]
+      if opts[:selected] == index do
+        [IO.ANSI.blue_background, IO.ANSI.white, row, IO.ANSI.reset]
+      else
+        row
+      end
     end |> Enum.intersperse("\n\r")
   end
 
