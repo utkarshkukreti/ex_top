@@ -8,6 +8,6 @@ defmodule ExTop.Collector do
       [{:pid, pid} | info]
     end
 
-    [processes: processes]
+    %{processes: processes}
   end
 end
