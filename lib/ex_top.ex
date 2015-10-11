@@ -56,8 +56,11 @@ defmodule ExTop do
   end
 
   def handle_cast(:render, state) do
+    # Only show 20 processes at once.
+    processes = Enum.take(state.data[:processes], 20)
+    data = %{state.data | processes: processes}
     IO.write [IO.ANSI.home,
-              ExTop.View.render(state.data, selected: state.selected)]
+              ExTop.View.render(data, selected: state.selected)]
     {:noreply, state}
   end
 end
