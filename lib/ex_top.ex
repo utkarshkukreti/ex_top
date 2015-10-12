@@ -1,7 +1,7 @@
 defmodule ExTop do
   use GenServer
 
-  defstruct [:node, :data, selected: 0, offset: 0]
+  defstruct [:node, :data, selected: 0, offset: 0, sort_by: 1]
 
   def start_link(opts \\ []) do
     GenServer.start_link ExTop, opts
@@ -66,6 +66,12 @@ defmodule ExTop do
     send self, {port, {:data, rest}}
     {:noreply, state}
   end
+  def handle_info({port, {:data, <<ch :: utf8, rest :: binary>>}}, state) when ch in '123456' do
+    state = %{state | sort_by: ch - ?0}
+    GenServer.cast self, :render
+    send self, {port, {:data, rest}}
+    {:noreply, state}
+  end
   def handle_info({_port, {:data, ""}}, state) do
     {:noreply, state}
   end
@@ -92,10 +98,20 @@ defmodule ExTop do
   end
 
   def handle_cast(:render, state) do
-    # Only show 20 processes at once.
-    processes = state.data[:processes]
-                |> Enum.drop(state.offset)
-                |> Enum.take(20)
+    processes =
+      state.data[:processes]
+      |> Enum.sort_by(fn process ->
+        case state.sort_by do
+          1 -> process[:pid]
+          2 -> process[:registered_name]
+          3 -> process[:memory]
+          4 -> process[:reductions]
+          5 -> process[:message_queue_len]
+          6 -> process[:current_function]
+        end
+      end)
+      |> Enum.drop(state.offset)
+      |> Enum.take(20)
     data = %{state.data | processes: processes}
     IO.write [IO.ANSI.home,
               ExTop.View.render(data, selected: state.selected)]
