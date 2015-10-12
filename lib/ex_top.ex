@@ -28,6 +28,9 @@ defmodule ExTop do
     # Load ExTop.Collector on the target node.
     {mod, bin, file} = :code.get_object_code(ExTop.Collector)
     :rpc.call node, :code, :load_binary, [mod, file, bin]
+    # Enable :scheduler_wall_time on the target node.
+    # FIXME: Is this a good idea?
+    :rpc.call node, :erlang, :system_flag, [:scheduler_wall_time, true]
 
     ExTop.start_link node: node
     :timer.sleep :infinity
