@@ -1,5 +1,5 @@
 defmodule ExTop.View do
-  @columns [{"PID", 12, :right},
+  @columns [{"PID", 13, :right},
             {"Registered Name", 24, :left},
             {"Memory", 9, :right},
             {"Reductions", 10, :right},
@@ -7,7 +7,8 @@ defmodule ExTop.View do
             {"Current Function", 32, :left}]
 
   def render(data, opts \\ []) do
-    [memory(data[:memory]),
+    [concat(system(data[:system]),
+            memory(data[:memory])),
      separator,
      heading,
      separator,
@@ -15,17 +16,28 @@ defmodule ExTop.View do
      separator] |> Enum.intersperse("\n\r")
   end
 
+  defp system(system) do
+    ["+---------------+------------",
+     "            Statistics       ",
+     "+---------------+------------",
+     "| Uptime        | #{just(inspect(system[:uptime]), 9, :right)}s ",
+     "| Process Count | #{just(inspect(system[:process_count]), 10, :right)} ",
+     "| Process Limit | #{just(inspect(system[:process_limit]), 10, :right)} ",
+     "| Run Queue     | #{just(inspect(system[:run_queue]), 10, :right)} ",
+     "| IO Input      | #{just(inspect(system[:io_input]), 10, :right)} ",
+     "| IO Output     | #{just(inspect(system[:io_output]), 10, :right)} "]
+  end
+
   defp memory(memory) do
-    ["+--------------+------------+",
-     "|           Memory          |",
-     "+--------------+------------+",
-     "| Total        | #{just(inspect(memory[:total]), 10, :right)} |",
-     "| Processes    | #{just(inspect(memory[:processes]), 10, :right)} |",
-     "| Atom         | #{just(inspect(memory[:atom]), 10, :right)} |",
-     "| Binary       | #{just(inspect(memory[:binary]), 10, :right)} |",
-     "| Code         | #{just(inspect(memory[:code]), 10, :right)} |",
-     "| ETS          | #{just(inspect(memory[:ets]), 10, :right)} |"]
-    |> Enum.intersperse("\n\r")
+    ["+-------------+-----------+",
+     "|          Memory         |",
+     "+-------------+-----------+",
+     "| Total       | #{just(inspect(memory[:total]), 9, :right)} |",
+     "| Processes   | #{just(inspect(memory[:processes]), 9, :right)} |",
+     "| Atom        | #{just(inspect(memory[:atom]), 9, :right)} |",
+     "| Binary      | #{just(inspect(memory[:binary]), 9, :right)} |",
+     "| Code        | #{just(inspect(memory[:code]), 9, :right)} |",
+     "| ETS         | #{just(inspect(memory[:ets]), 9, :right)} |"]
   end
 
   defp separator do
@@ -78,5 +90,11 @@ defmodule ExTop.View do
         :right -> String.rjust(string, length)
       end
     end
+  end
+
+  defp concat(left, right) do
+    for {left, right} <- Enum.zip(left, right) do
+      [left, right]
+    end |> Enum.intersperse("\r\n")
   end
 end
