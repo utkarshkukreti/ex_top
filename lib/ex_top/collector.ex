@@ -14,6 +14,7 @@ defmodule ExTop.Collector do
     process_count = :erlang.system_info(:process_count)
     process_limit = :erlang.system_info(:process_limit)
     uptime = :erlang.statistics(:wall_clock) |> elem(0) |> div(1000)
+    schedulers = :erlang.statistics(:scheduler_wall_time) |> Enum.sort
 
     %{memory: memory,
       processes: processes,
@@ -24,6 +25,7 @@ defmodule ExTop.Collector do
         process_limit: process_limit,
         run_queue: run_queue,
         uptime: uptime
-      }}
+      },
+      schedulers: schedulers}
   end
 end
