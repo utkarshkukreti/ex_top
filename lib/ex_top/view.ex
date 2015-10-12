@@ -7,11 +7,25 @@ defmodule ExTop.View do
             {"Current Function", 32, :left}]
 
   def render(data, opts \\ []) do
-    [separator,
+    [memory(data[:memory]),
+     separator,
      heading,
      separator,
      rows(data[:processes], opts),
      separator] |> Enum.intersperse("\n\r")
+  end
+
+  defp memory(memory) do
+    ["+--------------+------------+",
+     "|           Memory          |",
+     "+--------------+------------+",
+     "| Total        | #{just(inspect(memory[:total]), 10, :right)} |",
+     "| Processes    | #{just(inspect(memory[:processes]), 10, :right)} |",
+     "| Atom         | #{just(inspect(memory[:atom]), 10, :right)} |",
+     "| Binary       | #{just(inspect(memory[:binary]), 10, :right)} |",
+     "| Code         | #{just(inspect(memory[:code]), 10, :right)} |",
+     "| ETS          | #{just(inspect(memory[:ets]), 10, :right)} |"]
+    |> Enum.intersperse("\n\r")
   end
 
   defp separator do
