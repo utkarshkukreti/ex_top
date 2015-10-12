@@ -1,7 +1,7 @@
 defmodule ExTop do
   use GenServer
 
-  defstruct [:node, :data, selected: 0, offset: 0, sort_by: 1]
+  defstruct [:node, :data, selected: 0, offset: 0, sort_by: 1, sort_order: :ascending]
 
   def start_link(opts \\ []) do
     GenServer.start_link ExTop, opts
@@ -67,7 +67,16 @@ defmodule ExTop do
     {:noreply, state}
   end
   def handle_info({port, {:data, <<ch :: utf8, rest :: binary>>}}, state) when ch in '123456' do
-    state = %{state | sort_by: ch - ?0}
+    sort_by = ch - ?0
+    state = if state.sort_by == sort_by do
+      if state.sort_order == :ascending do
+        %{state | sort_order: :descending}
+      else
+        %{state | sort_order: :ascending}
+      end
+    else
+      %{state | sort_by: sort_by, sort_order: :ascending}
+    end
     GenServer.cast self, :render
     send self, {port, {:data, rest}}
     {:noreply, state}
@@ -110,6 +119,13 @@ defmodule ExTop do
           6 -> process[:current_function]
         end
       end)
+      |> (fn processes ->
+        if state.sort_order == :ascending do
+          processes
+        else
+          Enum.reverse(processes)
+        end
+      end).()
       |> Enum.drop(state.offset)
       |> Enum.take(20)
     data = %{state.data | processes: processes}
