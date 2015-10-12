@@ -56,6 +56,16 @@ defmodule ExTop do
     send self, {port, {:data, rest}}
     {:noreply, state}
   end
+  def handle_info({port, {:data, "j" <> rest}}, state) do
+    GenServer.cast self, {:key, :down}
+    send self, {port, {:data, rest}}
+    {:noreply, state}
+  end
+  def handle_info({port, {:data, "k" <> rest}}, state) do
+    GenServer.cast self, {:key, :up}
+    send self, {port, {:data, rest}}
+    {:noreply, state}
+  end
   def handle_info({_port, {:data, ""}}, state) do
     {:noreply, state}
   end
