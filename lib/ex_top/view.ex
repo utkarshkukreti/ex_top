@@ -11,7 +11,7 @@ defmodule ExTop.View do
 
   defp statistics(system) do
     ["+---------------+------------",
-     "            Statistics       ",
+     "|           Statistics       ",
      "+---------------+------------",
      "| Uptime        | #{just(inspect(system[:uptime]), 9, :right)}s ",
      "| Process Count | #{just(inspect(system[:process_count]), 10, :right)} ",
