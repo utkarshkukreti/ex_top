@@ -1,7 +1,8 @@
 defmodule ExTop.View do
   def render(data, opts \\ []) do
-    [concat(statistics(data[:system]),
-            memory(data[:memory])),
+    [concat3(statistics(data[:system]),
+             memory(data[:memory]),
+             schedulers(data[:prev_schedulers], data[:schedulers])),
      processes_separator,
      processes_heading,
      processes_separator,
@@ -31,6 +32,34 @@ defmodule ExTop.View do
      "| Binary      | #{just(inspect(memory[:binary]), 9, :right)} |",
      "| Code        | #{just(inspect(memory[:code]), 9, :right)} |",
      "| ETS         | #{just(inspect(memory[:ets]), 9, :right)} |"]
+  end
+
+  defp schedulers(prev, now) do
+    width = 50
+    usages = if prev do
+      for {{n, a1, t1}, {n, a2, t2}} <- Enum.zip(prev, now) |> Enum.take(8) do
+        {n, (a2 - a1) / (t2 - t1)}
+      end
+    else
+      []
+    end
+
+    ["---------------------------------------------------------------+"]
+    ++
+    for {n, usage} <- usages do
+      [" ",
+       inspect(n),
+       " [",
+       IO.ANSI.green,
+       just(String.duplicate("|", trunc(usage * width)), width, :left),
+       IO.ANSI.reset,
+       just(Float.to_string(usage * 100, decimals: 2) <> "%", 6, :right),
+       " ] |"]
+    end
+    ++
+    for _ <- 0..(8 - Enum.count(usages)) do
+      []
+    end
   end
 
   @processes_columns [{"PID", 13, :right},
@@ -92,9 +121,9 @@ defmodule ExTop.View do
     end
   end
 
-  defp concat(left, right) do
-    for {left, right} <- Enum.zip(left, right) do
-      [left, right]
+  defp concat3(a, b, c) do
+    for {{a, b}, c} <- Enum.zip(Enum.zip(a, b), c) do
+      [a, b, c]
     end |> Enum.intersperse("\r\n")
   end
 end

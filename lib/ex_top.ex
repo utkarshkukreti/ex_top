@@ -131,6 +131,7 @@ defmodule ExTop do
       |> Enum.drop(state.offset)
       |> Enum.take(20)
     data = %{state.data | processes: processes}
+           |> Map.put(:prev_schedulers, state.prev_schedulers)
     IO.write [IO.ANSI.home,
               ExTop.View.render(data, selected: state.selected)]
     {:noreply, state}
