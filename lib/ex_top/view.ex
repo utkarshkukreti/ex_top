@@ -57,7 +57,7 @@ defmodule ExTop.View do
 
   defp just(string, length, align) do
     if String.length(string) > length do
-      String.slice(string, 0, length)
+      String.slice(string, 0, length - 1) <> "…"
     else
       case align do
         :left -> String.ljust(string, length)
