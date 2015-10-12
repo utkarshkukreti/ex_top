@@ -4,7 +4,7 @@ defmodule ExTop.View do
             {"Memory", 9, :right},
             {"Reductions", 10, :right},
             {"Message Queue", 13, :right},
-            {"Current Function", 24, :left}]
+            {"Current Function", 32, :left}]
 
   def render(data, opts \\ []) do
     [separator,
