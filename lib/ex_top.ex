@@ -1,7 +1,8 @@
 defmodule ExTop do
   use GenServer
 
-  defstruct [:node, :data, selected: 0, offset: 0, sort_by: 1, sort_order: :ascending]
+  defstruct [:node, :data, :prev_schedulers,
+             selected: 0, offset: 0, sort_by: 1, sort_order: :ascending]
 
   def start_link(opts \\ []) do
     GenServer.start_link ExTop, opts
@@ -42,8 +43,9 @@ defmodule ExTop do
 
   def handle_info(:tick, state) do
     GenServer.cast self, :render
+    prev_schedulers = state.data && state.data.schedulers
     data = :rpc.call state.node, ExTop.Collector, :collect, []
-    {:noreply, %{state | data: data}}
+    {:noreply, %{state | data: data, prev_schedulers: prev_schedulers}}
   end
 
   def handle_info({port, {:data, "\e[A" <> rest}}, state) do
