@@ -81,7 +81,7 @@ defmodule ExTop do
     send self, {port, {:data, rest}}
     {:noreply, state}
   end
-  def handle_info({_port, {:data, ""}}, state) do
+  def handle_info({_port, {:data, _}}, state) do
     {:noreply, state}
   end
 
