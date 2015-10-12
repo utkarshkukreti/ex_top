@@ -1,22 +1,15 @@
 defmodule ExTop.View do
-  @columns [{"PID", 13, :right},
-            {"Registered Name", 24, :left},
-            {"Memory", 9, :right},
-            {"Reductions", 10, :right},
-            {"Message Queue", 13, :right},
-            {"Current Function", 32, :left}]
-
   def render(data, opts \\ []) do
-    [concat(system(data[:system]),
+    [concat(statistics(data[:system]),
             memory(data[:memory])),
-     separator,
-     heading,
-     separator,
-     rows(data[:processes], opts),
-     separator] |> Enum.intersperse("\n\r")
+     processes_separator,
+     processes_heading,
+     processes_separator,
+     processes_rows(data[:processes], opts),
+     processes_separator] |> Enum.intersperse("\n\r")
   end
 
-  defp system(system) do
+  defp statistics(system) do
     ["+---------------+------------",
      "            Statistics       ",
      "+---------------+------------",
@@ -40,26 +33,33 @@ defmodule ExTop.View do
      "| ETS         | #{just(inspect(memory[:ets]), 9, :right)} |"]
   end
 
-  defp separator do
+  @processes_columns [{"PID", 13, :right},
+                      {"Registered Name", 24, :left},
+                      {"Memory", 9, :right},
+                      {"Reductions", 10, :right},
+                      {"Message Queue", 13, :right},
+                      {"Current Function", 32, :left}]
+
+  defp processes_separator do
     [?+,
-    for {_, size, _} <- @columns do
+    for {_, size, _} <- @processes_columns do
       String.duplicate("-", size + 2)
     end |> Enum.intersperse(?+),
     ?+]
   end
 
-  defp heading do
+  defp processes_heading do
     ["| ",
-    for {name, size, align} <- @columns do
+    for {name, size, align} <- @processes_columns do
       just(name, size, align)
     end |> Enum.intersperse(" | "),
     " |"]
   end
 
-  defp rows(processes, opts) do
+  defp processes_rows(processes, opts) do
     for {process, index} <- Enum.with_index(processes) do
       row = ["| ",
-       for {name, size, align} <- @columns do
+       for {name, size, align} <- @processes_columns do
          text = case name do
            "PID" -> IO.iodata_to_binary(:erlang.pid_to_list(process[:pid]))
            "Registered Name" -> inspect(process[:registered_name])
