@@ -23,7 +23,13 @@ defmodule ExTop do
              [] -> Node.self
              [node] -> String.to_atom(node)
            end
-    :pong = Node.ping(node)
+
+    if Node.ping(node) == :pang do
+      IO.write [IO.ANSI.red,
+                "Could not connect to node #{node} with cookie #{inspect(cookie)}\n",
+                IO.ANSI.reset]
+      :erlang.halt
+    end
 
     # Load ExTop.Collector on the target node.
     {mod, bin, file} = :code.get_object_code(ExTop.Collector)
