@@ -1,7 +1,7 @@
 defmodule ExTop do
   use GenServer
 
-  defstruct [:node, :data, :prev_schedulers,
+  defstruct [:node, :data, :schedulers_snapshot,
              selected: 0, offset: 0, sort_by: 1, sort_order: :ascending]
 
   def start_link(opts \\ []) do
@@ -46,9 +46,9 @@ defmodule ExTop do
 
   def handle_info(:tick, state) do
     GenServer.cast self, :render
-    prev_schedulers = state.data && state.data.schedulers
+    schedulers_snapshot = state.data && state.data.schedulers
     data = :rpc.call state.node, ExTop.Collector, :collect, []
-    {:noreply, %{state | data: data, prev_schedulers: prev_schedulers}}
+    {:noreply, %{state | data: data, schedulers_snapshot: schedulers_snapshot}}
   end
 
   def handle_info({port, {:data, "\e[A" <> rest}}, state) do
@@ -150,7 +150,7 @@ defmodule ExTop do
       |> Enum.drop(state.offset)
       |> Enum.take(20)
     data = %{state.data | processes: processes}
-           |> Map.put(:prev_schedulers, state.prev_schedulers)
+           |> Map.put(:schedulers_snapshot, state.schedulers_snapshot)
     IO.write [IO.ANSI.home,
               ExTop.View.render(data, selected: state.selected)]
     {:noreply, state}

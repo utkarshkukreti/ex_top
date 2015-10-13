@@ -1,25 +1,25 @@
 defmodule ExTop.View do
   def render(data, opts \\ []) do
-    [concat3(schedulers(data[:prev_schedulers], data[:schedulers]),
-             memory(data[:memory]),
-             statistics(data[:system])),
+    [concat3(schedulers(data.schedulers_snapshot, data.schedulers),
+             memory(data.memory),
+             statistics(data.statistics)),
      processes_separator,
      processes_heading,
      processes_separator,
-     processes_rows(data[:processes], opts),
+     processes_rows(data.processes, opts),
      processes_separator] |> Enum.intersperse("\n\r")
   end
 
-  defp statistics(system) do
+  defp statistics(statistics) do
     ["+-----------------+----------------+",
      "|             Statistics           |",
      "+-----------------+----------------+",
-     "| Uptime          | #{just(inspect(system[:uptime]), 13, :right)}s |",
-     "| Process Count   | #{just(inspect(system[:process_count]), 14, :right)} |",
-     "| Process Limit   | #{just(inspect(system[:process_limit]), 14, :right)} |",
-     "| Run Queue       | #{just(inspect(system[:run_queue]), 14, :right)} |",
-     "| IO Input        | #{just(inspect(system[:io_input]), 14, :right)} |",
-     "| IO Output       | #{just(inspect(system[:io_output]), 14, :right)} |"]
+     "| Uptime          | #{just(inspect(statistics.uptime), 13, :right)}s |",
+     "| Process Count   | #{just(inspect(statistics.process_count), 14, :right)} |",
+     "| Process Limit   | #{just(inspect(statistics.process_limit), 14, :right)} |",
+     "| Run Queue       | #{just(inspect(statistics.run_queue), 14, :right)} |",
+     "| IO Input        | #{just(inspect(statistics.io_input), 14, :right)} |",
+     "| IO Output       | #{just(inspect(statistics.io_output), 14, :right)} |"]
   end
 
   defp memory(memory) do
@@ -34,9 +34,9 @@ defmodule ExTop.View do
      "| ETS        | #{just(inspect(memory[:ets]), 13, :right)} "]
   end
 
-  defp schedulers(prev, now) do
-    usages = if prev do
-      for {{n, a1, t1}, {n, a2, t2}} <- Enum.zip(prev, now) |> Enum.take(8) do
+  defp schedulers(old, new) do
+    usages = if old do
+      for {{n, a1, t1}, {n, a2, t2}} <- Enum.zip(old, new) |> Enum.take(8) do
         {n, (a2 - a1) / (t2 - t1)}
       end
     else
