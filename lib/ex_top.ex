@@ -92,6 +92,13 @@ defmodule ExTop do
     send self, {port, {:data, rest}}
     {:noreply, state}
   end
+  def handle_info({port, {:data, "G" <> rest}}, state) do
+    last = Enum.count(state.data.processes)
+    state = %{state | offset: last - 20, selected: 19}
+    GenServer.cast self, :render
+    send self, {port, {:data, rest}}
+    {:noreply, state}
+  end
   def handle_info({_port, {:data, _}}, state) do
     {:noreply, state}
   end
