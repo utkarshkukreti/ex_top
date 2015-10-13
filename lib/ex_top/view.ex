@@ -35,7 +35,6 @@ defmodule ExTop.View do
   end
 
   defp schedulers(prev, now) do
-    width = 41
     usages = if prev do
       for {{n, a1, t1}, {n, a2, t2}} <- Enum.zip(prev, now) |> Enum.take(8) do
         {n, (a2 - a1) / (t2 - t1)}
@@ -51,14 +50,14 @@ defmodule ExTop.View do
        inspect(n),
        " [",
        IO.ANSI.green,
-       just(String.duplicate("|", trunc(usage * width)), width, :left),
+       just(String.duplicate("|", trunc(usage * 41)), 41, :left),
        IO.ANSI.reset,
        just(Float.to_string(usage * 100, decimals: 2) <> "%", 6, :right),
        " ] "]
     end
     ++
     for _ <- 0..(8 - Enum.count(usages)) do
-      ["| ", String.duplicate(" ", width + 12)]
+      ["|                                                      "]
     end
   end
 
