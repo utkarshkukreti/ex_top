@@ -1,19 +1,47 @@
 # ExTop
 
-**TODO: Add description**
+ExTop is an interactive monitor for the Erlang VM written in Elixir.
+
+## Screenshots
+
+![Screenshot](https://dl.dropboxusercontent.com/u/2164813/github/utkarshkukreti/ex_top/screenshot.png)
+
+## Prerequisites
+
+* Erlang/OTP and Elixir
+* A terminal emulator supporting ANSI escape sequences and having atleast 120
+  columns and 33 lines.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+Clone this repository and execute `mix escript.build`. This will generate an
+escript executable named `ex_top`, which can be executed by typing `./ex_top`
 
-  1. Add ex_top to your list of dependencies in `mix.exs`:
+```
+$ git clone https://github.com/utkarshkukreti/ex_top
+$ cd ex_top
+$ mix escript.build
+$ ./ex_top
+```
 
-        def deps do
-          [{:ex_top, "~> 0.0.1"}]
-        end
+## Usage
 
-  2. Ensure ex_top is started before your application:
+### Keyboard Shortcuts
 
-        def application do
-          [applications: [:ex_top]]
-        end
+Key | Use
+----|-----
+j or Down Arrow | Select the next process.
+k or Up Arrow | Select the previous process.
+g | Select the first process.
+G | Select the last process.
+1-6 | Sort by the Nth column. Press again to toggle the sort order.
+q | Quit.
+
+### Connecting to other nodes
+
+```
+./ex_top <other node name> --cookie <cookie>
+```
+
+## License
+MIT
