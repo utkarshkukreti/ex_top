@@ -40,7 +40,6 @@ defmodule ExTop do
     Port.open({:spawn, "tty_sl -c -e"}, [:binary, :eof])
     IO.write IO.ANSI.clear
     send self, :tick
-    :timer.send_interval 1000, :tick
     {:ok, %ExTop{node: Keyword.get(opts, :node, Node.self)}}
   end
 
@@ -48,6 +47,7 @@ defmodule ExTop do
     GenServer.cast self, :render
     schedulers_snapshot = state.data && state.data.schedulers
     data = :rpc.call state.node, ExTop.Collector, :collect, []
+    Process.send_after self, :tick, 1000
     {:noreply, %{state | data: data, schedulers_snapshot: schedulers_snapshot}}
   end
 
