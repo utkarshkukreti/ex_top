@@ -2,7 +2,7 @@ defmodule ExTop do
   use GenServer
 
   defstruct [:node, :data, :schedulers_snapshot,
-             selected: 0, offset: 0, sort_by: 1, sort_order: :ascending]
+             selected: 0, offset: 0, sort_by: :pid, sort_order: :ascending]
 
   def start_link(opts \\ []) do
     GenServer.start_link ExTop, opts
@@ -72,7 +72,14 @@ defmodule ExTop do
     {:noreply, state}
   end
   def handle_info({port, {:data, <<ch :: utf8, rest :: binary>>}}, state) when ch in '123456' do
-    sort_by = ch - ?0
+    sort_by = case (ch - ?0) do
+                1 -> :pid
+                2 -> :name_or_initial_call
+                3 -> :memory
+                4 -> :reductions
+                5 -> :message_queue_len
+                6 -> :current_function
+              end
     state = if state.sort_by == sort_by do
       if state.sort_order == :ascending do
         %{state | sort_order: :descending}
@@ -130,16 +137,7 @@ defmodule ExTop do
   def handle_cast(:render, state) do
     processes =
       state.data[:processes]
-      |> Enum.sort_by(fn process ->
-        case state.sort_by do
-          1 -> process[:pid]
-          2 -> process[:name_or_initial_call]
-          3 -> process[:memory]
-          4 -> process[:reductions]
-          5 -> process[:message_queue_len]
-          6 -> process[:current_function]
-        end
-      end)
+      |> Enum.sort_by(fn process -> process[state.sort_by] end)
       |> (fn processes ->
         if state.sort_order == :ascending do
           processes
