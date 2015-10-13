@@ -3,11 +3,16 @@ defmodule ExTop.Collector do
     memory = :erlang.memory
     processes = for pid <- :erlang.processes do
       info = :erlang.process_info(pid, [:current_function,
+                                        :initial_call,
                                         :memory,
                                         :message_queue_len,
                                         :reductions,
                                         :registered_name])
-      [{:pid, pid} | info]
+      name_or_initial_call = case info[:registered_name] do
+                               [] -> info[:initial_call]
+                               otherwise -> otherwise
+                             end
+      [{:pid, pid}, {:name_or_initial_call, name_or_initial_call} | info]
     end
     {{:input, io_input}, {:output, io_output}} = :erlang.statistics(:io)
     run_queue = :erlang.statistics(:run_queue)
