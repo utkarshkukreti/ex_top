@@ -86,6 +86,12 @@ defmodule ExTop do
     send self, {port, {:data, rest}}
     {:noreply, state}
   end
+  def handle_info({port, {:data, "g" <> rest}}, state) do
+    state = %{state | offset: 0, selected: 0}
+    GenServer.cast self, :render
+    send self, {port, {:data, rest}}
+    {:noreply, state}
+  end
   def handle_info({_port, {:data, _}}, state) do
     {:noreply, state}
   end
