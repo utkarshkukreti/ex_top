@@ -112,7 +112,7 @@ defmodule ExTop do
     send self, {port, {:data, rest}}
     {:noreply, state}
   end
-  def handle_info({port, {:data, "q" <> rest}}, state) do
+  def handle_info({_port, {:data, "q" <> _rest}}, _state) do
     :erlang.halt
   end
   def handle_info({_port, {:data, _}}, state) do
