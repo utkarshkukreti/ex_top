@@ -117,7 +117,7 @@ defmodule ExTop do
       |> Enum.sort_by(fn process ->
         case state.sort_by do
           1 -> process[:pid]
-          2 -> process[:registered_name]
+          2 -> process[:name_or_initial_call]
           3 -> process[:memory]
           4 -> process[:reductions]
           5 -> process[:message_queue_len]

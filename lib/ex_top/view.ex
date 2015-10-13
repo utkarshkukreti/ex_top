@@ -63,7 +63,7 @@ defmodule ExTop.View do
   end
 
   @processes_columns [{"PID", 13, :right},
-                      {"Registered Name", 24, :left},
+                      {"Name or Initial Call", 24, :left},
                       {"Memory", 9, :right},
                       {"Reductions", 10, :right},
                       {"Message Queue", 13, :right},
@@ -91,7 +91,11 @@ defmodule ExTop.View do
        for {name, size, align} <- @processes_columns do
          text = case name do
            "PID" -> IO.iodata_to_binary(:erlang.pid_to_list(process[:pid]))
-           "Registered Name" -> inspect(process[:registered_name])
+           "Name or Initial Call" ->
+             case process[:name_or_initial_call] do
+               {m, f, a} -> "#{inspect(m)}.#{f}/#{a}"
+               name -> inspect(name)
+             end
            "Memory" -> inspect(process[:memory])
            "Reductions" -> inspect(process[:reductions])
            "Message Queue" -> inspect(process[:message_queue_len])
