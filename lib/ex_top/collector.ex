@@ -8,12 +8,17 @@ defmodule ExTop.Collector do
                                         :message_queue_len,
                                         :reductions,
                                         :registered_name])
-      name_or_initial_call = case info[:registered_name] do
-                               [] -> info[:initial_call]
-                               otherwise -> otherwise
-                             end
-      [{:pid, pid}, {:name_or_initial_call, name_or_initial_call} | info]
-    end
+      case info do
+        :undefined -> nil
+        info ->
+          name_or_initial_call = case info[:registered_name] do
+                                   [] -> info[:initial_call]
+                                   otherwise -> otherwise
+                                 end
+          [{:pid, pid}, {:name_or_initial_call, name_or_initial_call} | info]
+      end
+    end |> Enum.reject(&is_nil/1)
+
     {{:input, io_input}, {:output, io_output}} = :erlang.statistics(:io)
     run_queue = :erlang.statistics(:run_queue)
     process_count = :erlang.system_info(:process_count)
