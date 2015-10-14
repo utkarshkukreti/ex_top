@@ -26,7 +26,7 @@ defmodule ExTop do
 
     if Node.ping(node) == :pang do
       IO.write [IO.ANSI.red,
-                "Could not connect to node #{node} with cookie #{inspect(cookie)}\n",
+                "Could not connect to node #{node} with cookie #{Node.get_cookie}\n",
                 IO.ANSI.reset]
       :erlang.halt
     end
