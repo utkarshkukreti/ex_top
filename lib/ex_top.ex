@@ -11,9 +11,14 @@ defmodule ExTop do
   def main(args) do
     {opts, args, _} = OptionParser.parse(args)
 
-    name = Keyword.get(opts, :name, "ex_top") |> String.to_atom
-
-    Node.start(name, :shortnames)
+    cond do
+      sname = Keyword.get(opts, :sname) ->
+        Node.start String.to_atom(sname), :shortnames
+      name = Keyword.get(opts, :name) ->
+        Node.start String.to_atom(name), :longnames
+      true ->
+        Node.start :ex_top, :shortnames
+    end
 
     if cookie = Keyword.get(opts, :cookie) do
       Node.set_cookie(String.to_atom(cookie))
