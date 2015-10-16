@@ -11,7 +11,7 @@ defmodule ExTop do
   def main(args) do
     {opts, args, _} = OptionParser.parse(args)
 
-    cond do
+    {:ok, _} = cond do
       sname = Keyword.get(opts, :sname) ->
         Node.start String.to_atom(sname), :shortnames
       name = Keyword.get(opts, :name) ->
