@@ -43,7 +43,7 @@ defmodule ExTop do
     # FIXME: Is this a good idea?
     :rpc.call node, :erlang, :system_flag, [:scheduler_wall_time, true]
 
-    ExTop.start_link node: node
+    {:ok, _} = ExTop.start_link(node: node)
     :timer.sleep :infinity
   end
 
