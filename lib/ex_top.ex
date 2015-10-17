@@ -2,7 +2,8 @@ defmodule ExTop do
   use GenServer
 
   defstruct [:node, :data, :schedulers_snapshot,
-             selected: 0, offset: 0, sort_by: :pid, sort_order: :ascending]
+             selected: 0, offset: 0, sort_by: :pid, sort_order: :ascending,
+             paused?: false]
 
   def start_link(opts \\ []) do
     GenServer.start_link ExTop, opts
@@ -54,12 +55,17 @@ defmodule ExTop do
     {:ok, %ExTop{node: Keyword.get(opts, :node, Node.self)}}
   end
 
-  def handle_info(:collect, state) do
-    GenServer.cast self, :render
-    schedulers_snapshot = state.data && state.data.schedulers
-    data = :rpc.call state.node, ExTop.Collector, :collect, []
-    Process.send_after self, :collect, 1000
-    {:noreply, %{state | data: data, schedulers_snapshot: schedulers_snapshot}}
+  def handle_info(:collect, %{paused?: paused?} = state) do
+    if paused? do
+      Process.send_after self, :collect, 1000
+      {:noreply, state}
+    else
+      GenServer.cast self, :render
+      schedulers_snapshot = state.data && state.data.schedulers
+      data = :rpc.call state.node, ExTop.Collector, :collect, []
+      Process.send_after self, :collect, 1000
+      {:noreply, %{state | data: data, schedulers_snapshot: schedulers_snapshot}}
+    end
   end
 
   def handle_info({port, {:data, "\e[A" <> rest}}, state) do
@@ -114,6 +120,11 @@ defmodule ExTop do
     last = Enum.count(state.data.processes)
     state = %{state | offset: last - 20, selected: 19}
     GenServer.cast self, :render
+    send self, {port, {:data, rest}}
+    {:noreply, state}
+  end
+  def handle_info({port, {:data, "p" <> rest}}, %{paused?: paused?} = state) do
+    state = %{state | paused?: not paused?}
     send self, {port, {:data, rest}}
     {:noreply, state}
   end
