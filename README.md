@@ -35,6 +35,7 @@ k or Up Arrow | Select the previous process.
 g | Select the first process.
 G | Select the last process.
 1-6 | Sort by the Nth column. Press again to toggle the sort order.
+p | Pause/Unpause data collection.
 q | Quit.
 
 ### Connecting to other nodes
