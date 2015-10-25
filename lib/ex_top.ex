@@ -12,13 +12,24 @@ defmodule ExTop do
   def main(args) do
     {opts, args, _} = OptionParser.parse(args)
 
-    {:ok, _} = cond do
+    result = cond do
       sname = Keyword.get(opts, :sname) ->
         Node.start String.to_atom(sname), :shortnames
       name = Keyword.get(opts, :name) ->
         Node.start String.to_atom(name), :longnames
       true ->
         Node.start :ex_top, :shortnames
+    end
+
+    case result do
+      {:ok, _} -> :ok
+      {:error, _} ->
+        IO.write [IO.ANSI.red,
+                  "Failed to start a distributed Node.\n",
+                  "Make sure `epmd` (the Erlang Port Mapper Daemon) is ",
+                  "running by executing `epmd -daemon` in your shell.\n",
+                  IO.ANSI.reset]
+        :erlang.halt
     end
 
     if cookie = Keyword.get(opts, :cookie) do
