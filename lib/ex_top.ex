@@ -12,16 +12,16 @@ defmodule ExTop do
   def main(args) do
     {opts, args, _} = OptionParser.parse(args)
 
-    result = cond do
+    {node_name, node_type} = cond do
       sname = Keyword.get(opts, :sname) ->
-        Node.start String.to_atom(sname), :shortnames
+        {String.to_atom(sname), :shortnames}
       name = Keyword.get(opts, :name) ->
-        Node.start String.to_atom(name), :longnames
+        {String.to_atom(name), :longnames}
       true ->
-        Node.start :ex_top, :shortnames
+        {:ex_top, :shortnames}
     end
 
-    case result do
+    case Node.start(node_name, node_type) do
       {:ok, _} -> :ok
       {:error, _} ->
         IO.write [IO.ANSI.red,
