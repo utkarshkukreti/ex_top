@@ -159,7 +159,7 @@ defmodule ExTop do
   def handle_cast({:key, :down}, state) do
     max = Enum.count(state.data[:processes]) - 1
     state = cond do
-      state.offset + state.selected + 1 >= max -> state
+      state.offset + state.selected >= max -> state
       state.selected == 19 -> %{state | offset: state.offset + 1}
       true -> %{state | selected: state.selected + 1}
     end
