@@ -1,7 +1,7 @@
 defmodule ExTop do
   use GenServer
 
-  defstruct [:node, :data, :schedulers_snapshot,
+  defstruct [:node, :data, :schedulers_snapshot, :rows,
              selected: 0, offset: 0, sort_by: :pid, sort_order: :ascending,
              paused?: false]
 
@@ -63,7 +63,8 @@ defmodule ExTop do
     Port.open({:spawn, "tty_sl -c -e"}, [:binary, :eof])
     IO.write IO.ANSI.clear
     send self, :collect
-    {:ok, %ExTop{node: Keyword.get(opts, :node, Node.self)}}
+    {:ok, rows} = :io.rows
+    {:ok, %ExTop{node: Keyword.get(opts, :node, Node.self), rows: rows}}
   end
 
   def handle_info(:collect, %{paused?: paused?} = state) do
@@ -129,7 +130,7 @@ defmodule ExTop do
   end
   def handle_info({port, {:data, "G" <> rest}}, state) do
     last = Enum.count(state.data.processes)
-    state = %{state | offset: last - 20, selected: 19}
+    state = %{state | offset: last - (state.rows - 13), selected: state.rows - 14}
     GenServer.cast self, :render
     send self, {port, {:data, rest}}
     {:noreply, state}
@@ -160,7 +161,7 @@ defmodule ExTop do
     max = Enum.count(state.data[:processes]) - 1
     state = cond do
       state.offset + state.selected >= max -> state
-      state.selected == 19 -> %{state | offset: state.offset + 1}
+      state.selected == state.rows - 14 -> %{state | offset: state.offset + 1}
       true -> %{state | selected: state.selected + 1}
     end
     GenServer.cast self, :render
@@ -179,7 +180,7 @@ defmodule ExTop do
         end
       end).()
       |> Enum.drop(state.offset)
-      |> Enum.take(20)
+      |> Enum.take(state.rows - 13)
     data = %{state.data | processes: processes}
            |> Map.put(:schedulers_snapshot, state.schedulers_snapshot)
     IO.write [IO.ANSI.home,
