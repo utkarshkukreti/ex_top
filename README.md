@@ -2,9 +2,9 @@
 
 ExTop is an interactive monitor for the Erlang VM written in Elixir.
 
-## Screenshots
+## Demo
 
-![Screenshot](https://dl.dropboxusercontent.com/u/2164813/github/utkarshkukreti/ex_top/screenshot.png)
+![Demo](https://dl.dropboxusercontent.com/u/2164813/github/utkarshkukreti/ex_top/demo.gif)
 
 ## Prerequisites
 
