@@ -37,7 +37,18 @@ defmodule ExTop do
     end
 
     node = case args do
-             [] -> Node.self
+             [] ->
+               IO.puts "Select a Node to connect to:"
+               {:ok, names} = :net_adm.names
+               [_, host] = Node.self |> Atom.to_string |> String.split("@")
+               nodes = for {name, _} <- names do
+                 String.to_atom "#{name}@#{host}"
+               end
+               for {node, index} <- nodes |> Enum.with_index do
+                 IO.puts "#{index}: #{node}"
+               end
+               which = IO.gets("") |> String.rstrip |> String.to_integer
+               Enum.fetch!(nodes, which)
              [node] -> String.to_atom(node)
            end
 
