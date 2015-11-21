@@ -9,8 +9,8 @@ ExTop is an interactive monitor for the Erlang VM written in Elixir.
 ## Prerequisites
 
 * Erlang/OTP and Elixir
-* A terminal emulator supporting ANSI escape sequences and having atleast 120
-  columns and 33 lines.
+* A terminal emulator supporting ANSI escape sequences and having 120 or more
+  columns and 14 or more rows.
 
 ## Installation
 
