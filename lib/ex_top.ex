@@ -100,7 +100,8 @@ defmodule ExTop do
     Port.open({:spawn, "tty_sl -c -e"}, [:binary, :eof])
     IO.write(IO.ANSI.clear())
     send(self(), :collect)
-    {:ok, rows} = :io.rows()
+    {rows, 0} = System.cmd("tput", ["lines"])
+    rows = rows |> String.trim_trailing() |> String.to_integer()
     {:ok, %ExTop{node: Keyword.get(opts, :node, Node.self()), rows: rows}}
   end
 
