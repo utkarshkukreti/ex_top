@@ -68,7 +68,7 @@ defmodule ExTop do
             IO.puts("#{index}: #{node}")
           end
 
-          which = IO.gets("") |> String.trim_trailing() |> String.to_integer()
+          which = gets() |> String.trim_trailing() |> String.to_integer()
           Enum.fetch!(nodes, which)
 
         [node] ->
@@ -244,5 +244,16 @@ defmodule ExTop do
 
     IO.write([IO.ANSI.home(), ExTop.View.render(data, selected: state.selected)])
     {:noreply, state}
+  end
+
+  # Read a line from stdin (fd = 0)
+  defp gets do
+    port = Port.open({:fd, 0, 1}, [:in, :binary, line: 256])
+
+    receive do
+      {^port, {:data, {:eol, line}}} ->
+        Port.close(port)
+        line
+    end
   end
 end

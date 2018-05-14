@@ -34,6 +34,6 @@ defmodule ExTop.Mixfile do
   end
 
   defp escript do
-    [main_module: ExTop, emu_args: "-elixir ansi_enabled true"]
+    [main_module: ExTop, emu_args: "-elixir ansi_enabled true -noinput"]
   end
 end
