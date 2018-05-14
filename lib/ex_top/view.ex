@@ -6,11 +6,11 @@ defmodule ExTop.View do
         memory(data.memory),
         statistics(data.statistics)
       ),
-      processes_separator,
-      processes_heading,
-      processes_separator,
+      processes_separator(),
+      processes_heading(),
+      processes_separator(),
       processes_rows(data.processes, opts),
-      processes_separator
+      processes_separator()
     ]
     |> Enum.intersperse("\n\r")
   end
@@ -62,7 +62,7 @@ defmodule ExTop.View do
           IO.ANSI.green(),
           just(String.duplicate("|", trunc(usage * 41)), 41, :left),
           IO.ANSI.reset(),
-          just(Float.to_string(usage * 100, decimals: 2) <> "%", 6, :right),
+          just(:erlang.float_to_binary(usage * 100, decimals: 2) <> "%", 6, :right),
           " ] "
         ]
       end ++
@@ -152,8 +152,8 @@ defmodule ExTop.View do
       String.slice(string, 0, length - 1) <> "…"
     else
       case align do
-        :left -> String.ljust(string, length)
-        :right -> String.rjust(string, length)
+        :left -> String.pad_trailing(string, length)
+        :right -> String.pad_leading(string, length)
       end
     end
   end

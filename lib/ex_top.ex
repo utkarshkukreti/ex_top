@@ -68,7 +68,7 @@ defmodule ExTop do
             IO.puts("#{index}: #{node}")
           end
 
-          which = IO.gets("") |> String.rstrip() |> String.to_integer()
+          which = IO.gets("") |> String.trim_trailing() |> String.to_integer()
           Enum.fetch!(nodes, which)
 
         [node] ->
@@ -99,45 +99,45 @@ defmodule ExTop do
   def init(opts) do
     Port.open({:spawn, "tty_sl -c -e"}, [:binary, :eof])
     IO.write(IO.ANSI.clear())
-    send(self, :collect)
+    send(self(), :collect)
     {:ok, rows} = :io.rows()
     {:ok, %ExTop{node: Keyword.get(opts, :node, Node.self()), rows: rows}}
   end
 
   def handle_info(:collect, %{paused?: paused?} = state) do
     if paused? do
-      Process.send_after(self, :collect, 1000)
+      Process.send_after(self(), :collect, 1000)
       {:noreply, state}
     else
-      GenServer.cast(self, :render)
+      GenServer.cast(self(), :render)
       schedulers_snapshot = state.data && state.data.schedulers
       data = :rpc.call(state.node, ExTop.Collector, :collect, [])
-      Process.send_after(self, :collect, 1000)
+      Process.send_after(self(), :collect, 1000)
       {:noreply, %{state | data: data, schedulers_snapshot: schedulers_snapshot}}
     end
   end
 
   def handle_info({port, {:data, "\e[A" <> rest}}, state) do
-    GenServer.cast(self, {:key, :up})
-    send(self, {port, {:data, rest}})
+    GenServer.cast(self(), {:key, :up})
+    send(self(), {port, {:data, rest}})
     {:noreply, state}
   end
 
   def handle_info({port, {:data, "\e[B" <> rest}}, state) do
-    GenServer.cast(self, {:key, :down})
-    send(self, {port, {:data, rest}})
+    GenServer.cast(self(), {:key, :down})
+    send(self(), {port, {:data, rest}})
     {:noreply, state}
   end
 
   def handle_info({port, {:data, "j" <> rest}}, state) do
-    GenServer.cast(self, {:key, :down})
-    send(self, {port, {:data, rest}})
+    GenServer.cast(self(), {:key, :down})
+    send(self(), {port, {:data, rest}})
     {:noreply, state}
   end
 
   def handle_info({port, {:data, "k" <> rest}}, state) do
-    GenServer.cast(self, {:key, :up})
-    send(self, {port, {:data, rest}})
+    GenServer.cast(self(), {:key, :up})
+    send(self(), {port, {:data, rest}})
     {:noreply, state}
   end
 
@@ -163,29 +163,29 @@ defmodule ExTop do
         %{state | sort_by: sort_by, sort_order: :ascending}
       end
 
-    GenServer.cast(self, :render)
-    send(self, {port, {:data, rest}})
+    GenServer.cast(self(), :render)
+    send(self(), {port, {:data, rest}})
     {:noreply, state}
   end
 
   def handle_info({port, {:data, "g" <> rest}}, state) do
     state = %{state | offset: 0, selected: 0}
-    GenServer.cast(self, :render)
-    send(self, {port, {:data, rest}})
+    GenServer.cast(self(), :render)
+    send(self(), {port, {:data, rest}})
     {:noreply, state}
   end
 
   def handle_info({port, {:data, "G" <> rest}}, state) do
     last = Enum.count(state.data.processes)
     state = %{state | offset: last - (state.rows - 13), selected: state.rows - 14}
-    GenServer.cast(self, :render)
-    send(self, {port, {:data, rest}})
+    GenServer.cast(self(), :render)
+    send(self(), {port, {:data, rest}})
     {:noreply, state}
   end
 
   def handle_info({port, {:data, "p" <> rest}}, %{paused?: paused?} = state) do
     state = %{state | paused?: not paused?}
-    send(self, {port, {:data, rest}})
+    send(self(), {port, {:data, rest}})
     {:noreply, state}
   end
 
@@ -205,7 +205,7 @@ defmodule ExTop do
         {n, _} -> %{state | selected: n - 1}
       end
 
-    GenServer.cast(self, :render)
+    GenServer.cast(self(), :render)
     {:noreply, state}
   end
 
@@ -219,7 +219,7 @@ defmodule ExTop do
         true -> %{state | selected: state.selected + 1}
       end
 
-    GenServer.cast(self, :render)
+    GenServer.cast(self(), :render)
     {:noreply, state}
   end
 
