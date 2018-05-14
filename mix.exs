@@ -2,13 +2,15 @@ defmodule ExTop.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :ex_top,
-     version: "0.0.1",
-     elixir: "~> 1.1",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps,
-     escript: escript]
+    [
+      app: :ex_top,
+      version: "0.0.1",
+      elixir: "~> 1.1",
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      deps: deps,
+      escript: escript
+    ]
   end
 
   # Configuration for the OTP application
@@ -32,7 +34,6 @@ defmodule ExTop.Mixfile do
   end
 
   defp escript do
-    [main_module: ExTop,
-     emu_args: "-elixir ansi_enabled true"]
+    [main_module: ExTop, emu_args: "-elixir ansi_enabled true"]
   end
 end
